@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blox Fruits Gacha Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #1e1b4b 0%, #09090b 100%);
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        .glow-gold {
+            box-shadow: 0 0 25px rgba(234, 179, 8, 0.4);
+        }
+        .glow-mythic {
+            box-shadow: 0 0 35px rgba(239, 68, 68, 0.6);
+        }
+        .wheel-container {
+            perspective: 1000px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4 md:p-8">
+
+    <header class="w-full max-w-5xl flex flex-col md:flex-row items-center justify-between bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="flex items-center space-x-3 mb-3 md:mb-0">
+            <div class="w-12 h-12 bg-gradient-to-tr from-amber-500 to-red-600 rounded-xl flex items-center justify-center font-black text-2xl shadow-lg shadow-amber-500/30">
+                🍑
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-black bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                    BLOX FRUITS SIMULATOR
+                </h1>
+                <p class="text-xs text-slate-400">Spin the Cousin's Gacha & Collect Them All!</p>
+            </div>
+        </div>
+        <div class="flex flex-col items-end gap-2">
+            <div class="flex items-center space-x-4 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800">
+                <div class="flex items-center space-x-2">
+                    <span class="text-amber-400 text-lg">🪙</span>
+                    <span id="playerBeli" class="font-bold text-amber-300 text-lg">1,500,000</span>
+                </div>
+                <button onclick="addBeli()" class="bg-emerald-600 hover:bg-emerald-500 text-xs font-bold px-3 py-1.5 rounded-lg transition active:scale-95 shadow-md">
+                    +500K Beli
+                </button>
+            </div>
+            <!-- Creator Credit Banner -->
+            <div class="text-[11px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent text-right">
+                Made by Rafa from SMK Ismail Petra
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-4xl my-6 flex flex-col items-center justify-center space-y-8">
+        
+        <!-- Cousin NPC dialogue & banner -->
+        <div class="relative bg-gradient-to-r from-indigo-950/80 via-slate-900/90 to-indigo-950/80 border border-indigo-500/30 rounded-3xl p-6 md:p-8 w-full max-w-2xl text-center shadow-2xl backdrop-blur-md">
+            <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black px-6 py-1 rounded-full text-xs md:text-sm uppercase tracking-wider shadow-lg">
+                Blox Fruit Dealer Cousin
+            </div>
+            <p id="npcDialogue" class="text-sm md:text-base text-slate-300 italic mb-4 mt-2">
+                "Hey cousin! Feeling lucky today? Gacha costs <span class="text-amber-400 font-bold">250,000 Beli</span>!"
+            </p>
+
+            <!-- Roulette Wheel / Visual Spinner Box -->
+            <div class="wheel-container relative w-full h-44 bg-slate-950/90 rounded-2xl border-2 border-slate-800 overflow-hidden flex items-center justify-center shadow-inner">
+                <!-- Center indicator pointer -->
+                <div class="absolute top-0 bottom-0 w-1 bg-red-500 z-30 shadow-[0_0_10px_#ef4444]"></div>
+                <div class="absolute top-2 z-30 bg-red-600 text-white font-black text-xs px-2 py-0.5 rounded shadow">▼</div>
+                
+                <!-- Strip of fruits for rolling animation -->
+                <div id="rollerStrip" class="absolute flex items-center space-x-4 px-12 transition-all duration-0 ease-out" style="left: 0px;">
+                    <!-- Dynamically populated via JS -->
+                </div>
+                
+                <!-- Initial State overlay text -->
+                <div id="rollerPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-xs z-20">
+                    <span class="text-4xl mb-2">🎁</span>
+                    <span class="text-sm font-semibold text-slate-400">Press Spin to Roll Random Fruit!</span>
+                </div>
+            </div>
+
+            <!-- Spin Controls & Buffs -->
+            <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button id="spinBtn" onclick="spinFruit()" class="w-full sm:w-auto bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 hover:from-amber-400 hover:to-red-500 text-slate-950 font-black text-lg px-10 py-4 rounded-2xl shadow-xl transition transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    SPIN FRUIT (250K Beli)
+                </button>
+                <button id="luckBtn" onclick="toggleLuck()" class="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm px-6 py-4 rounded-2xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+                    <span>🍀</span> <span id="luckBtnText">Super Luck: OFF (500K Beli)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Card Modal / Banner -->
+        <div id="resultCard" class="hidden w-full max-w-md bg-gradient-to-b from-slate-900 to-slate-950 border-2 rounded-3xl p-6 text-center shadow-2xl transition-all duration-300 scale-95 opacity-0">
+            <h3 id="resultRarity" class="text-xs font-black tracking-widest uppercase mb-2">MYTHICAL</h3>
+            <div id="resultIcon" class="text-7xl my-4 animate-bounce">🐉</div>
+            <h2 id="resultName" class="text-2xl font-black text-white mb-1">Dragon Fruit</h2>
+            <p id="resultType" class="text-xs font-semibold text-slate-400 uppercase mb-4">Type: Beast • Value: 3,500,000</p>
+            <div class="flex justify-center gap-3">
+                <button onclick="storeFruit()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition shadow-lg">
+                    Store in Inventory
+                </button>
+                <button onclick="closeResult()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm px-4 py-2.5 rounded-xl transition">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="w-full max-w-5xl bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2">
+            <div>
+                <h2 class="text-lg font-bold flex items-center gap-2">
+                    <span>🎒</span> Fruit Inventory & Collection
+                </h2>
+                <p class="text-xs text-slate-400">Collected <span id="collectionCount">0</span> / <span id="totalFruitsCount">0</span> unique fruits</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="switchTab('inventory')" id="tabInvBtn" class="bg-indigo-600 text-xs font-bold px-4 py-2 rounded-xl transition">Inventory (<span id="invCount">0</span>)</button>
+                <button onclick="switchTab('pokedex')" id="tabDexBtn" class="bg-slate-800 text-slate-400 text-xs font-bold px-4 py-2 rounded-xl transition">Index</button>
+            </div>
+        </div>
+
+        <!-- Inventory Grid -->
+        <div id="inventoryContainer" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 max-h-56 overflow-y-auto p-2 bg-slate-950/60 rounded-xl border border-slate-800/80">
+            <!-- Dynamically populated -->
+        </div>
+
+        <!-- Pokedex Grid -->
+        <div id="pokedexContainer" class="hidden grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 max-h-56 overflow-y-auto p-2 bg-slate-950/60 rounded-xl border border-slate-800/80">
+            <!-- Dynamically populated -->
+        </div>
+    </footer>
+
+    <script>
+        // Blox Fruits catalog categorized by rarity
+        const bloxFruits = [
+            // Common
+            { name: "Rocket", rarity: "Common", type: "Natural", price: 5000, icon: "🚀", color: "border-slate-600 text-slate-400 bg-slate-900", weight: 30 },
+            { name: "Spin", rarity: "Common", type: "Natural", price: 7500, icon: "🌀", color: "border-slate-600 text-slate-400 bg-slate-900", weight: 30 },
+            { name: "Blade", rarity: "Common", type: "Natural", price: 30000, icon: "🗡️", color: "border-slate-600 text-slate-400 bg-slate-900", weight: 25 },
+            { name: "Spring", rarity: "Common", type: "Natural", price: 60000, icon: "⚡", color: "border-slate-600 text-slate-400 bg-slate-900", weight: 20 },
+            { name: "Bomb", rarity: "Common", type: "Natural", price: 80000, icon: "💣", color: "border-slate-600 text-slate-400 bg-slate-900", weight: 20 },
+            { name: "Smoke", rarity: "Common", type: "Elemental", price: 100000, icon: "💨", color: "border-slate-600 text-slate-400 bg-slate-900", weight: 18 },
+            { name: "Spike", rarity: "Common", type: "Natural", price: 180000, icon: "🌵", color: "border-slate-600 text-slate-400 bg-slate-900", weight: 15 },
+
+            // Uncommon
+            { name: "Flame", rarity: "Uncommon", type: "Elemental", price: 250000, icon: "🔥", color: "border-emerald-600 text-emerald-400 bg-emerald-950/30", weight: 12 },
+            { name: "Falcon", rarity: "Uncommon", type: "Beast", price: 300000, icon: "🦅", color: "border-emerald-600 text-emerald-400 bg-emerald-950/30", weight: 10 },
+            { name: "Ice", rarity: "Uncommon", type: "Elemental", price: 350000, icon: "🧊", color: "border-emerald-600 text-emerald-400 bg-emerald-950/30", weight: 10 },
+            { name: "Sand", rarity: "Uncommon", type: "Elemental", price: 420000, icon: "🏜️", color: "border-emerald-600 text-emerald-400 bg-emerald-950/30", weight: 8 },
+            { name: "Dark", rarity: "Uncommon", type: "Elemental", price: 500000, icon: "🌑", color: "border-emerald-600 text-emerald-400 bg-emerald-950/30", weight: 8 },
+
+            // Rare
+            { name: "Diamond", rarity: "Rare", type: "Natural", price: 600000, icon: "💎", color: "border-blue-600 text-blue-400 bg-blue-950/30", weight: 6 },
+            { name: "Light", rarity: "Rare", type: "Elemental", price: 650000, icon: "✨", color: "border-blue-600 text-blue-400 bg-blue-950/30", weight: 6 },
+            { name: "Rubber", rarity: "Rare", type: "Natural", price: 1200000, icon: "🎈", color: "border-blue-600 text-blue-400 bg-blue-950/30", weight: 5 },
+            { name: "Barrier", rarity: "Rare", type: "Natural", price: 800000, icon: "🛡️", color: "border-blue-600 text-blue-400 bg-blue-950/30", weight: 5 },
+            { name: "Ghost", rarity: "Rare", type: "Natural", price: 940000, icon: "👻", color: "border-blue-600 text-blue-400 bg-blue-950/30", weight: 5 },
+            { name: "Magma", rarity: "Rare", type: "Elemental", price: 960000, icon: "🌋", color: "border-blue-600 text-blue-400 bg-blue-950/30", weight: 5 },
+
+            // Legendary
+            { name: "Quake", rarity: "Legendary", type: "Natural", price: 1000000, icon: "🌊", color: "border-purple-600 text-purple-400 bg-purple-950/30", weight: 3 },
+            { name: "Buddha", rarity: "Legendary", type: "Natural", price: 1200000, icon: "🧘", color: "border-purple-600 text-purple-400 bg-purple-950/30", weight: 2.5 },
+            { name: "Love", rarity: "Legendary", type: "Natural", price: 1300000, icon: "💖", color: "border-purple-600 text-purple-400 bg-purple-950/30", weight: 2.5 },
+            { name: "Spider", rarity: "Legendary", type: "Natural", price: 1500000, icon: "🕷️", color: "border-purple-600 text-purple-400 bg-purple-950/30", weight: 2 },
+            { name: "Sound", rarity: "Legendary", type: "Natural", price: 1700000, icon: "🎵", color: "border-purple-600 text-purple-400 bg-purple-950/30", weight: 2 },
+            { name: "Phoenix", rarity: "Legendary", type: "Beast", price: 1800000, icon: "🔥", color: "border-purple-600 text-purple-400 bg-purple-950/30", weight: 1.8 },
+            { name: "Portal", rarity: "Legendary", type: "Natural", price: 1900000, icon: "🌀", color: "border-purple-600 text-purple-400 bg-purple-950/30", weight: 1.5 },
+            { name: "Pain", rarity: "Legendary", type: "Natural", price: 2300000, icon: "💢", color: "border-purple-600 text-purple-400 bg-purple-950/30", weight: 1.2 },
+            { name: "Rumble", rarity: "Legendary", type: "Elemental", price: 2100000, icon: "⚡", color: "border-purple-600 text-purple-400 bg-purple-950/30", weight: 1.2 },
+            { name: "Blizzard", rarity: "Legendary", type: "Elemental", price: 2400000, icon: "❄️", color: "border-purple-600 text-purple-400 bg-purple-950/30", weight: 1.0 },
+
+            // Mythical
+            { name: "Gravity", rarity: "Mythical", type: "Natural", price: 2500000, icon: "🪐", color: "border-red-600 text-red-400 bg-red-950/30", weight: 0.8 },
+            { name: "Mammoth", rarity: "Mythical", type: "Beast", price: 2700000, icon: "🦣", color: "border-red-600 text-red-400 bg-red-950/30", weight: 0.6 },
+            { name: "T-Rex", rarity: "Mythical", type: "Beast", price: 2700000, icon: "🦖", color: "border-red-600 text-red-400 bg-red-950/30", weight: 0.5 },
+            { name: "Dough", rarity: "Mythical", type: "Natural", price: 2800000, icon: "🍩", color: "border-red-600 text-red-400 bg-red-950/30", weight: 0.4 },
+            { name: "Shadow", rarity: "Mythical", type: "Natural", price: 2900000, icon: "👥", color: "border-red-600 text-red-400 bg-red-950/30", weight: 0.4 },
+            { name: "Venom", rarity: "Mythical", type: "Natural", price: 3000000, icon: "🧪", color: "border-red-600 text-red-400 bg-red-950/30", weight: 0.35 },
+            { name: "Control", rarity: "Mythical", type: "Natural", price: 3200000, icon: "🔵", color: "border-red-600 text-red-400 bg-red-950/30", weight: 0.3 },
+            { name: "Spirit", rarity: "Mythical", type: "Natural", price: 3400000, icon: "👻", color: "border-red-600 text-red-400 bg-red-950/30", weight: 0.25 },
+            { name: "Dragon", rarity: "Mythical", type: "Beast", price: 3500000, icon: "🐉", color: "border-red-600 text-red-400 bg-red-950/30", weight: 0.2 },
+            { name: "Leopard", rarity: "Mythical", type: "Beast", price: 5000000, icon: "🐆", color: "border-red-600 text-red-400 bg-red-950/30", weight: 0.15 },
+            { name: "Kit Kat (Kitsune)", rarity: "Mythical", type: "Beast", price: 8000000, icon: "🦊", color: "border-amber-500 text-amber-300 bg-amber-950/40 glow-gold", weight: 0.08 }
+        ];
+
+        // State variables
+        let playerBeli = 1500000;
+        let inventory = [];
+        let unlockedDex = new Set();
+        let currentRolledFruit = null;
+        let hasSuperLuck = false;
+        const SPIN_COST = 250000;
+        const LUCK_COST = 500000;
+
+        // Initialize UI
+        document.getElementById('totalFruitsCount').innerText = bloxFruits.length;
+        updateBeliDisplay();
+        renderInventory();
+        renderPokedex();
+
+        function updateBeliDisplay() {
+            document.getElementById('playerBeli').innerText = playerBeli.toLocaleString();
+        }
+
+        function addBeli() {
+            playerBeli += 500000;
+            updateBeliDisplay();
+        }
+
+        function toggleLuck() {
+            if (!hasSuperLuck) {
+                if (playerBeli < LUCK_COST) {
+                    alertUser("Not enough Beli for Super Luck! Need 500K Beli.");
+                    return;
+                }
+                playerBeli -= LUCK_COST;
+                hasSuperLuck = true;
+                updateBeliDisplay();
+                document.getElementById('luckBtnText').innerText = "Super Luck: ON (1 Spin)";
+                document.getElementById('luckBtn').className = "w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm px-6 py-4 rounded-2xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2 ring-2 ring-emerald-400 animate-pulse";
+                alertUser("🍀 Super Luck Activated! Next spin guarantees Legendary or Mythical with boosted Dragon & Kitsune rates!");
+            } else {
+                playerBeli += LUCK_COST;
+                hasSuperLuck = false;
+                updateBeliDisplay();
+                document.getElementById('luckBtnText').innerText = "Super Luck: OFF (500K Beli)";
+                document.getElementById('luckBtn').className = "w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm px-6 py-4 rounded-2xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2";
+                alertUser("Super Luck deactivated. 500K Beli refunded.");
+            }
+        }
+
+        function getRandomFruit() {
+            let eligibleFruits = bloxFruits;
+
+            if (hasSuperLuck) {
+                // Filter only Legendary and Mythical fruits
+                eligibleFruits = bloxFruits.filter(f => f.rarity === 'Legendary' || f.rarity === 'Mythical');
+            }
+
+            let modifiedFruits = eligibleFruits.map(f => {
+                let w = f.weight;
+                if (hasSuperLuck) {
+                    // Massive specific boosts for Dragon and Kitsune when Super Luck is active
+                    if (f.name === "Dragon" || f.name.includes("Kitsune")) {
+                        w = 80; // High weight for Dragon & Kitsune
+                    } else if (f.rarity === 'Mythical') {
+                        w = 30; // Solid weight for other mythicals
+                    } else {
+                        w = 10; // Lower weight for standard legendaries
+                    }
+                }
+                return { ...f, currentWeight: w };
+            });
+
+            const totalWeight = modifiedFruits.reduce((sum, f) => sum + f.currentWeight, 0);
+            let randomNum = Math.random() * totalWeight;
+            for (let fruit of modifiedFruits) {
+                if (randomNum < fruit.currentWeight) return fruit;
+                randomNum -= fruit.currentWeight;
+            }
+            return modifiedFruits[0];
+        }
+
+        function spinFruit() {
+            if (playerBeli < SPIN_COST) {
+                alertUser("Not enough Beli! Claim more Beli to spin.");
+                return;
+            }
+
+            playerBeli -= SPIN_COST;
+            updateBeliDisplay();
+
+            // Capture super luck state for this spin before clearing flag
+            const wasSuperLuckActive = hasSuperLuck;
+
+            if (hasSuperLuck) {
+                hasSuperLuck = false;
+                document.getElementById('luckBtnText').innerText = "Super Luck: OFF (500K Beli)";
+                document.getElementById('luckBtn').className = "w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm px-6 py-4 rounded-2xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2";
+            }
+
+            const spinBtn = document.getElementById('spinBtn');
+            spinBtn.disabled = true;
+            document.getElementById('rollerPlaceholder').classList.add('hidden');
+            document.getElementById('resultCard').classList.add('hidden');
+
+            const rollerStrip = document.getElementById('rollerStrip');
+            rollerStrip.innerHTML = '';
+
+            // Restore temporarily for strip generation if super luck was active
+            if (wasSuperLuckActive) hasSuperLuck = true;
+            const winningFruit = getRandomFruit();
+            if (wasSuperLuckActive) hasSuperLuck = false; // consume it
+
+            currentRolledFruit = winningFruit;
+
+            const stripItems = [];
+            for (let i = 0; i < 35; i++) {
+                if (wasSuperLuckActive) hasSuperLuck = true;
+                stripItems.push(getRandomFruit());
+                if (wasSuperLuckActive) hasSuperLuck = false;
+            }
+            stripItems.push(winningFruit); // Landing item
+            for (let i = 0; i < 5; i++) {
+                if (wasSuperLuckActive) hasSuperLuck = true;
+                stripItems.push(getRandomFruit());
+                if (wasSuperLuckActive) hasSuperLuck = false;
+            }
+
+            // Render strip HTML
+            stripItems.forEach(fruit => {
+                const card = document.createElement('div');
+                card.className = `flex-shrink-0 w-28 h-32 rounded-2xl border-2 ${fruit.color} flex flex-col items-center justify-center p-2 shadow-lg bg-slate-900`;
+                card.innerHTML = `
+                    <span class="text-3xl mb-1">${fruit.icon}</span>
+                    <span class="text-xs font-bold text-center truncate w-full">${fruit.name}</span>
+                    <span class="text-[9px] uppercase tracking-wider opacity-80 mt-1">${fruit.rarity}</span>
+                `;
+                rollerStrip.appendChild(card);
+            });
+
+            // Animate strip translation
+            rollerStrip.style.transition = 'none';
+            rollerStrip.style.left = '0px';
+
+            const itemWidth = 128;
+            const targetIndex = 35;
+            const containerWidth = rollerStrip.parentElement.clientWidth;
+            const targetLeft = - (targetIndex * itemWidth) + (containerWidth / 2) - (itemWidth / 2);
+
+            setTimeout(() => {
+                rollerStrip.style.transition = 'left 4s cubic-bezier(0.1, 0.8, 0.1, 1)';
+                rollerStrip.style.left = `${targetLeft}px`;
+            }, 50);
+
+            setTimeout(() => {
+                showResult(winningFruit);
+                spinBtn.disabled = false;
+            }, 4100);
+        }
+
+        function showResult(fruit) {
+            unlockedDex.add(fruit.name);
+            renderPokedex();
+
+            const resultCard = document.getElementById('resultCard');
+            const resultRarity = document.getElementById('resultRarity');
+            const resultIcon = document.getElementById('resultIcon');
+            const resultName = document.getElementById('resultName');
+            const resultType = document.getElementById('resultType');
+
+            resultRarity.innerText = `${fruit.rarity} FRUIT`;
+            resultIcon.innerText = fruit.icon;
+            resultName.innerText = fruit.name;
+            resultType.innerText = `Type: ${fruit.type} • Value: 🪙 ${fruit.price.toLocaleString()}`;
+
+            // Styling colors based on rarity
+            resultCard.className = `w-full max-w-md bg-gradient-to-b from-slate-900 to-slate-950 border-2 rounded-3xl p-6 text-center shadow-2xl transition-all duration-300 transform scale-100 opacity-100 ${fruit.color}`;
+            
+            resultCard.classList.remove('hidden');
+        }
+
+        function closeResult() {
+            document.getElementById('resultCard').classList.add('hidden');
+        }
+
+        function storeFruit() {
+            if (!currentRolledFruit) return;
+            inventory.push({ ...currentRolledFruit, id: Date.now() });
+            renderInventory();
+            closeResult();
+        }
+
+        function renderInventory() {
+            const container = document.getElementById('inventoryContainer');
+            document.getElementById('invCount').innerText = inventory.length;
+            container.innerHTML = '';
+
+            if (inventory.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-6 text-center text-xs text-slate-500">Your inventory is empty. Spin to collect fruits!</div>`;
+                return;
+            }
+
+            inventory.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = `relative rounded-xl border ${item.color} p-2 flex flex-col items-center justify-center text-center shadow-md bg-slate-900`;
+                div.innerHTML = `
+                    <span class="text-2xl mb-1">${item.icon}</span>
+                    <span class="text-[11px] font-bold truncate w-full">${item.name}</span>
+                    <span class="text-[9px] opacity-75">${item.rarity}</span>
+                    <button onclick="sellFruit(${index})" title="Sell for Beli" class="absolute -top-2 -right-2 bg-red-600 hover:bg-red-500 text-white rounded-full w-5 h-5 text-[10px] font-bold flex items-center justify-center shadow">×</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function sellFruit(index) {
+            const fruit = inventory[index];
+            const sellPrice = Math.floor(fruit.price * 0.2); // Sell for 20% value
+            playerBeli += sellPrice;
+            updateBeliDisplay();
+            inventory.splice(index, 1);
+            renderInventory();
+        }
+
+        function renderPokedex() {
+            const container = document.getElementById('pokedexContainer');
+            document.getElementById('collectionCount').innerText = unlockedDex.size;
+            container.innerHTML = '';
+
+            bloxFruits.forEach(fruit => {
+                const isUnlocked = unlockedDex.has(fruit.name);
+                const div = document.createElement('div');
+                if (isUnlocked) {
+                    div.className = `rounded-xl border ${fruit.color} p-2 flex flex-col items-center justify-center text-center shadow-md bg-slate-900`;
+                    div.innerHTML = `
+                        <span class="text-2xl mb-1">${fruit.icon}</span>
+                        <span class="text-[11px] font-bold truncate w-full">${fruit.name}</span>
+                        <span class="text-[9px] opacity-75">${fruit.rarity}</span>
+                    `;
+                } else {
+                    div.className = `rounded-xl border border-slate-800 p-2 flex flex-col items-center justify-center text-center bg-slate-950/40 text-slate-600`;
+                    div.innerHTML = `
+                        <span class="text-2xl mb-1 opacity-20">❓</span>
+                        <span class="text-[11px] font-bold truncate w-full">Locked</span>
+                        <span class="text-[9px] opacity-40">${fruit.rarity}</span>
+                    `;
+                }
+                container.appendChild(div);
+            });
+        }
+
+        function switchTab(tab) {
+            const invBtn = document.getElementById('tabInvBtn');
+            const dexBtn = document.getElementById('tabDexBtn');
+            const invContainer = document.getElementById('inventoryContainer');
+            const dexContainer = document.getElementById('pokedexContainer');
+
+            if (tab === 'inventory') {
+                invBtn.className = "bg-indigo-600 text-xs font-bold px-4 py-2 rounded-xl transition";
+                dexBtn.className = "bg-slate-800 text-slate-400 text-xs font-bold px-4 py-2 rounded-xl transition";
+                invContainer.classList.remove('hidden');
+                dexContainer.classList.add('hidden');
+            } else {
+                dexBtn.className = "bg-indigo-600 text-xs font-bold px-4 py-2 rounded-xl transition";
+                invBtn.className = "bg-slate-800 text-slate-400 text-xs font-bold px-4 py-2 rounded-xl transition";
+                dexContainer.classList.remove('hidden');
+                invContainer.classList.add('hidden');
+            }
+        }
+
+        function alertUser(msg) {
+            // Safe replacement for alert()
+            const existingAlert = document.getElementById('customAlert');
+            if (existingAlert) existingAlert.remove();
+
+            const alertBox = document.createElement('div');
+            alertBox.id = 'customAlert';
+            alertBox.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-xl shadow-2xl font-bold z-50 animate-bounce text-sm';
+            alertBox.innerText = msg;
+            document.body.appendChild(alertBox);
+
+            setTimeout(() => {
+                alertBox.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
